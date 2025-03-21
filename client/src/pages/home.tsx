@@ -19,7 +19,7 @@ export default function Home() {
     data: solutions, 
     isLoading: solutionsLoading,
     error: solutionsError 
-  } = useQuery({
+  } = useQuery<Solution[]>({
     queryKey: ['/api/solutions'],
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -28,7 +28,7 @@ export default function Home() {
   const {
     data: selectedSolution,
     isLoading: solutionLoading,
-  } = useQuery({
+  } = useQuery<Solution>({
     queryKey: ['/api/solutions', selectedSolutionId],
     enabled: !!selectedSolutionId,
     staleTime: 5 * 60 * 1000, // 5 minutes

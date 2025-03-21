@@ -116,7 +116,8 @@ async function loadSolutionsFromCSV() {
         log(`Parsed ${processedSolutions.size} unique solutions from CSV`);
         
         // Save solutions to storage
-        for (const solution of processedSolutions.values()) {
+        const solutionsArray = Array.from(processedSolutions.values());
+        for (const solution of solutionsArray) {
           await storage.createOrUpdateSolution(solution);
         }
         
