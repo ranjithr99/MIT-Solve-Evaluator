@@ -2,8 +2,15 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    try {
+      // Try to parse as JSON first
+      const errorData = await res.json();
+      throw new Error(errorData.message || errorData.error || `${res.status}: ${res.statusText}`);
+    } catch (jsonError) {
+      // If JSON parsing fails, use text fallback
+      const text = await res.text().catch(() => res.statusText);
+      throw new Error(`${res.status}: ${text}`);
+    }
   }
 }
 
@@ -12,15 +19,20 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: data ? { "Content-Type": "application/json" } : {},
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
 
-  await throwIfResNotOk(res);
-  return res;
+    // Don't throw here - we'll let calling code decide how to handle non-OK responses
+    return res;
+  } catch (error) {
+    console.error("Network error in apiRequest:", error);
+    throw new Error("Network error: Could not connect to the server.");
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -29,16 +41,32 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(queryKey[0] as string, {
+        credentials: "include",
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      if (!res.ok) {
+        try {
+          // Try to parse error as JSON
+          const errorData = await res.json();
+          throw new Error(errorData.message || errorData.error || `${res.status}: ${res.statusText}`);
+        } catch (jsonError) {
+          // If JSON parsing fails, use text
+          const text = await res.text().catch(() => res.statusText);
+          throw new Error(`${res.status}: ${text}`);
+        }
+      }
+      
+      return await res.json();
+    } catch (error) {
+      console.error("Query error:", error);
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({

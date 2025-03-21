@@ -31,12 +31,23 @@ export default function EvaluationResults({ solutionId, apiConfig, solution }: E
     mutationFn: async () => {
       if (!solutionId) throw new Error("No solution selected");
       
-      const response = await apiRequest(
-        "POST", 
-        `/api/evaluate/${solutionId}`,
-        apiConfig
-      );
-      return response.json() as Promise<EvaluationResponse>;
+      try {
+        const response = await apiRequest(
+          "POST", 
+          `/api/evaluate/${solutionId}`,
+          apiConfig
+        );
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `API error: ${response.status}`);
+        }
+        
+        return response.json() as Promise<EvaluationResponse>;
+      } catch (err) {
+        console.error("Evaluation error:", err);
+        throw err; // Re-throw to trigger onError
+      }
     },
     onSuccess: () => {
       // Invalidate evaluation cache
@@ -47,6 +58,7 @@ export default function EvaluationResults({ solutionId, apiConfig, solution }: E
       });
     },
     onError: (err) => {
+      console.error("Error in mutation:", err);
       toast({
         title: "Evaluation Failed",
         description: String(err),
