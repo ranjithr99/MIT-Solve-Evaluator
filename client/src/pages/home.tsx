@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import SolutionSelector from "@/components/SolutionSelector";
 import SolutionOverview from "@/components/SolutionOverview";
 import EvaluationResults from "@/components/EvaluationResults";
+import BatchEvaluation from "@/components/BatchEvaluation";
 import ApiConfigPanel from "@/components/ApiConfig";
 import { Solution, ApiConfig as ApiConfigType } from "@/lib/types";
 
@@ -102,6 +103,12 @@ export default function Home() {
               apiConfig={apiConfig}
               solution={selectedSolution as Solution}
               onResetRef={resetEvaluationRef}
+            />
+            
+            {/* Batch Evaluation Panel */}
+            <BatchEvaluation 
+              solutions={solutions}
+              apiConfig={apiConfig}
             />
             
             <ApiConfigPanel
