@@ -6,6 +6,7 @@ import EvaluationResults from "@/components/EvaluationResults";
 import BatchEvaluation from "@/components/BatchEvaluation";
 import ApiConfigPanel from "@/components/ApiConfig";
 import { Solution, ApiConfig as ApiConfigType } from "@/lib/types";
+import logo from "@/assets/logo.jpeg";
 
 export default function Home() {
   // State
@@ -67,7 +68,7 @@ export default function Home() {
         <header className="mb-8">
           <div className="flex items-center mb-2">
             <img 
-              src="https://solve.mit.edu/assets/solve-logo-social-d6c9b00f34f32a267d6847770bbdccd414a66f48102a841581c3a1d722635c6e.png" 
+              src={logo} 
               alt="MIT Solve Logo" 
               className="h-10 mr-3"
             />
