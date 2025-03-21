@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Solution, EvaluationResponse, CriterionResult, ApiConfig, SCREENING_CRITERIA } from "@/lib/types";
@@ -90,6 +90,17 @@ export default function EvaluationResults({ solutionId, apiConfig, solution, onR
       });
     }
   };
+  
+  // Connect reset function to ref
+  useEffect(() => {
+    if (onResetRef) {
+      onResetRef.current = () => {
+        console.log("Resetting evaluation results");
+        // Reset the main evaluation mutation
+        reset();
+      };
+    }
+  }, [onResetRef, reset]);
 
   // Render no evaluation state
   if (!solutionId) {
