@@ -1,0 +1,221 @@
+# MIT Solve Health Solutions Evaluation Agent Prompt
+
+## Task Overview
+Create an interactive webpage to evaluate startup solutions from the MIT Solve Global Health Challenge. The webpage will feature a dropdown menu to select solutions by ID and name. When a solution is selected, it will be evaluated against five specific screening criteria using the Google Gemini API, displaying pass/fail results with reasoning for each criterion.
+
+## Data Sources
+The evaluation will work with two primary data sources:
+1. A CSV file containing solution details with columns including:
+   - Solution ID
+   - Challenge Name
+   - One-line summary
+   - Headquarters location (city/town/region and country)
+   - Organization type
+   - Problem statement
+   - Solution description
+   - Target beneficiaries and impact
+   - Technologies used
+   - Website/app links
+   - Operating countries (current and planned)
+   - Team size and duration
+   - Diversity and inclusion approaches
+   - Business model
+   - Service delivery model
+   - Financial sustainability plan
+
+2. The MIT Solve screening criteria (as provided in the paste.txt file):
+   - Criterion 1: Completeness, Appropriateness, and Intelligibility
+   - Criterion 2: Prototype Stage Verification
+   - Criterion 3: Relevance to Challenge
+   - Criterion 4: Technology-Driven Solution
+   - Criterion 5: Suitability for External Review
+
+## Webpage Requirements
+
+### UI Components
+1. **Header Section**:
+   - Title: "MIT Solve Global Health Challenge Evaluator"
+   - Subtitle explaining the purpose of the tool
+
+2. **Solution Selector**:
+   - Dropdown menu listing solutions by ID and name (e.g., "SOL123 - Health Connect Platform")
+   - Optional search functionality within the dropdown
+
+3. **Solution Overview Panel**:
+   - Displays key information about the selected solution
+   - Includes: summary, location, problem statement, solution description, technologies used
+
+4. **Evaluation Results Panel**:
+   - Five separate sections, one for each criterion
+   - Each section includes:
+     - Criterion name and description
+     - Pass/Fail status (visually distinct)
+     - Reasoning for the decision (2-3 sentences)
+   - Overall verdict (Pass/Fail across all criteria)
+
+5. **Loading Indicator**:
+   - Shows when the Gemini API is processing the evaluation
+
+### Technical Specifications
+
+1. **Frontend Framework**:
+   - React with modern component patterns
+   - Responsive design for desktop and mobile viewing
+
+2. **Data Processing**:
+   - Parse the CSV file on application load
+   - Store solution data in a structured format for efficient access
+
+3. **Gemini API Integration**:
+   - Use Google's Gemini 2.0 Flash model for evaluation
+   - Craft prompts for each criterion evaluation
+   - Process and parse API responses
+
+4. **State Management**:
+   - Maintain selection state
+   - Cache previous evaluations to minimize API calls
+
+## Gemini API Prompt Engineering
+
+For each solution evaluation, construct a detailed prompt for the Gemini API that:
+
+1. **Provides Context**:
+   - Include the full MIT Solve challenge description
+   - Explain all five criteria in detail
+
+2. **Presents Solution Data**:
+   - Include all relevant fields from the CSV for the selected solution
+   - Format data clearly with field labels
+
+3. **Requests Specific Outputs**:
+   - Ask for pass/fail determinations for each criterion
+   - Request brief reasoning (2-3 sentences) for each determination
+   - Request overall verdict
+
+4. **Output Format Specification**:
+   - Request JSON-formatted response for easy parsing:
+   ```json
+   {
+     "criteria": [
+       {
+         "id": 1,
+         "name": "Completeness, Appropriateness, and Intelligibility",
+         "result": "PASS",
+         "reasoning": "The solution application is comprehensive with detailed responses to most required questions. It is clearly intelligible and defines the solution well. All content is in English."
+       },
+       // Other criteria...
+     ],
+     "overallVerdict": "PASS"
+   }
+   ```
+
+## Sample Gemini API Prompt Template
+
+```
+You are an expert evaluator for the MIT Solve Global Health Challenge. You need to assess the following solution against the five screening criteria.
+
+### MIT Solve Challenge Context:
+[Insert full challenge description here]
+
+### Evaluation Criteria:
+[Insert detailed explanation of all five criteria]
+
+### Solution to Evaluate:
+Solution ID: [ID]
+Solution Name: [Name]
+Summary: [One-line summary]
+Headquarters: [City/Region], [Country]
+Organization Type: [Type]
+Problem Statement: [Problem description]
+Solution Description: [Solution description]
+Target Beneficiaries: [Beneficiary description]
+Technologies Used: [Technologies list]
+Operating Countries: [Countries list]
+Team Size: [Size]
+Duration: [Time working on solution]
+Business Model: [Model description]
+Financial Plan: [Sustainability plan]
+
+### Instructions:
+1. Carefully analyze the solution against each criterion
+2. For each criterion, determine a PASS or FAIL result
+3. Provide 2-3 sentences explaining your reasoning for each determination
+4. Provide an overall verdict (PASS or FAIL)
+
+Return your evaluation in the following JSON format:
+{
+  "criteria": [
+    {
+      "id": 1,
+      "name": "Completeness, Appropriateness, and Intelligibility",
+      "result": "PASS/FAIL",
+      "reasoning": "Your reasoning here"
+    },
+    ... other criteria ...
+  ],
+  "overallVerdict": "PASS/FAIL"
+}
+```
+
+## Implementation Steps
+
+1. **Set Up Project Structure**:
+   - Initialize React application
+   - Configure necessary dependencies
+   - Establish component structure
+
+2. **Create Data Loading Logic**:
+   - Implement CSV parsing functionality
+   - Store structured solution data
+
+3. **Build UI Components**:
+   - Create dropdown selector
+   - Design solution overview panel
+   - Design evaluation results panel
+
+4. **Implement Gemini API Integration**:
+   - Set up API authentication
+   - Create prompt construction function
+   - Implement API calling mechanism
+   - Parse API responses
+
+5. **Connect UI to Data and API**:
+   - Link dropdown selection to solution data
+   - Trigger API calls on selection
+   - Update UI with evaluation results
+
+6. **Add Final Touches**:
+   - Implement loading states
+   - Add error handling
+   - Optimize performance
+   - Ensure responsive design
+
+## Testing Guidelines
+
+1. **Data Validation**:
+   - Verify all CSV fields are correctly parsed
+   - Test with missing or incomplete data fields
+
+2. **API Testing**:
+   - Confirm prompt construction logic works correctly
+   - Verify API responses are properly parsed
+   - Test with various solution profiles
+
+3. **UI Testing**:
+   - Verify dropdown functionality
+   - Ensure responsive design works across devices
+   - Test loading states and error handling
+
+## Deployment Considerations
+
+1. **API Key Security**:
+   - Secure handling of Gemini API credentials
+   - Consider using environment variables
+
+2. **Performance Optimization**:
+   - Implement caching for API results
+   - Optimize rendering for large CSV datasets
+
+3. **User Analytics**:
+   - Consider adding basic usage tracking
+   - Monitor API usage and costs
