@@ -78,17 +78,26 @@ export default function SolutionOverview({ solution, isLoading }: SolutionOvervi
           
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-1">Problem Statement</h4>
-            <p className="text-gray-800 text-sm">{solution.problemStatement || "N/A"}</p>
+            <div 
+              className="text-gray-800 text-sm prose prose-sm max-w-none" 
+              dangerouslySetInnerHTML={{ __html: solution.problemStatement || "N/A" }}
+            />
           </div>
           
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-1">Solution Description</h4>
-            <p className="text-gray-800 text-sm">{solution.solutionDescription || "N/A"}</p>
+            <div 
+              className="text-gray-800 text-sm prose prose-sm max-w-none" 
+              dangerouslySetInnerHTML={{ __html: solution.solutionDescription || "N/A" }}
+            />
           </div>
           
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-1">Target Beneficiaries</h4>
-            <p className="text-gray-800 text-sm">{solution.targetBeneficiaries || "N/A"}</p>
+            <div 
+              className="text-gray-800 text-sm prose prose-sm max-w-none" 
+              dangerouslySetInnerHTML={{ __html: solution.targetBeneficiaries || "N/A" }}
+            />
           </div>
           
           <div>
@@ -103,26 +112,38 @@ export default function SolutionOverview({ solution, isLoading }: SolutionOvervi
             </div>
             <div>
               <h4 className="text-sm font-medium text-gray-500 mb-1">Team & Duration</h4>
-              <p className="text-gray-800 text-sm">{solution.teamSize || "N/A"} {solution.duration ? `, ${solution.duration}` : ""}</p>
+              <div 
+                className="text-gray-800 text-sm prose prose-sm max-w-none" 
+                dangerouslySetInnerHTML={{ __html: (solution.teamSize || "N/A") + (solution.duration ? `, ${solution.duration}` : "") }}
+              />
             </div>
           </div>
           
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-1">Business Model</h4>
-            <p className="text-gray-800 text-sm">{solution.businessModel || "N/A"}</p>
+            <div 
+              className="text-gray-800 text-sm prose prose-sm max-w-none" 
+              dangerouslySetInnerHTML={{ __html: solution.businessModel || "N/A" }}
+            />
           </div>
           
           {solution.serviceDeliveryModel && (
             <div>
               <h4 className="text-sm font-medium text-gray-500 mb-1">Service Delivery Model</h4>
-              <p className="text-gray-800 text-sm">{solution.serviceDeliveryModel}</p>
+              <div 
+                className="text-gray-800 text-sm prose prose-sm max-w-none" 
+                dangerouslySetInnerHTML={{ __html: solution.serviceDeliveryModel }}
+              />
             </div>
           )}
           
           {solution.financialSustainability && (
             <div>
               <h4 className="text-sm font-medium text-gray-500 mb-1">Financial Sustainability</h4>
-              <p className="text-gray-800 text-sm">{solution.financialSustainability}</p>
+              <div 
+                className="text-gray-800 text-sm prose prose-sm max-w-none" 
+                dangerouslySetInnerHTML={{ __html: solution.financialSustainability }}
+              />
             </div>
           )}
         </div>

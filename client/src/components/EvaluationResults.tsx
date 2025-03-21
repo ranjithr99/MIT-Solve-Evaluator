@@ -231,7 +231,10 @@ export default function EvaluationResults({ solutionId, apiConfig, solution }: E
                       </p>
                       <div className="bg-gray-100 p-3 rounded-md">
                         <h4 className="text-sm font-medium text-gray-700 mb-1">Reasoning</h4>
-                        <p className="text-sm text-gray-800">{criterion.reasoning}</p>
+                        <div 
+                          className="text-sm text-gray-800 prose prose-sm max-w-none" 
+                          dangerouslySetInnerHTML={{ __html: criterion.reasoning }}
+                        />
                       </div>
                     </div>
                   </div>
