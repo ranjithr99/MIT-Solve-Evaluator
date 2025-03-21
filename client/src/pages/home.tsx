@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import SolutionSelector from "@/components/SolutionSelector";
 import SolutionOverview from "@/components/SolutionOverview";
@@ -13,6 +13,9 @@ export default function Home() {
     model: "gemini-2.0-flash",
     temperature: 0.2
   });
+  
+  // Reference to the evaluation reset function
+  const resetEvaluationRef = useRef<() => void>(() => {});
 
   // Fetch solutions
   const { 
@@ -44,6 +47,10 @@ export default function Home() {
 
   // Handle solution selection
   const handleSolutionSelect = (solutionId: string) => {
+    // Reset evaluation results when a new solution is selected
+    if (resetEvaluationRef.current) {
+      resetEvaluationRef.current();
+    }
     setSelectedSolutionId(solutionId);
   };
 
@@ -94,6 +101,7 @@ export default function Home() {
               solutionId={selectedSolutionId}
               apiConfig={apiConfig}
               solution={selectedSolution as Solution}
+              onResetRef={resetEvaluationRef}
             />
             
             <ApiConfigPanel

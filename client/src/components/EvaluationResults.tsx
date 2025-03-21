@@ -12,9 +12,10 @@ interface EvaluationResultsProps {
   solutionId: string | null;
   apiConfig: ApiConfig;
   solution: Solution | undefined;
+  onResetRef?: React.MutableRefObject<() => void>;
 }
 
-export default function EvaluationResults({ solutionId, apiConfig, solution }: EvaluationResultsProps) {
+export default function EvaluationResults({ solutionId, apiConfig, solution, onResetRef }: EvaluationResultsProps) {
   const [isApiResponseOpen, setIsApiResponseOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
