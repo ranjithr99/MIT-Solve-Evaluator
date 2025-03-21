@@ -9,8 +9,12 @@ interface SolutionOverviewProps {
 }
 
 export default function SolutionOverview({ solution, isLoading }: SolutionOverviewProps) {
+  // Debug to console
+  console.log("SolutionOverview props:", { solution, isLoading });
+  
   // Render loading skeleton when data is loading
   if (isLoading) {
+    console.log("SolutionOverview: Loading state");
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-medium mb-4 text-gray-800">Solution Overview</h2>
@@ -38,6 +42,7 @@ export default function SolutionOverview({ solution, isLoading }: SolutionOvervi
 
   // No solution selected state
   if (!solution) {
+    console.log("SolutionOverview: No solution state");
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-medium mb-4 text-gray-800">Solution Overview</h2>

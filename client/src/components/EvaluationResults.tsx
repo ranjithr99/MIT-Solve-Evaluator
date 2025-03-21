@@ -18,6 +18,15 @@ export default function EvaluationResults({ solutionId, apiConfig, solution }: E
   const [isApiResponseOpen, setIsApiResponseOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  
+  // Debug props
+  console.log("EvaluationResults props:", { 
+    solutionId, 
+    apiConfig, 
+    solution,
+    solutionIsUndefined: solution === undefined,
+    solutionIsNull: solution === null
+  });
 
   // Mutation for evaluating a solution
   const {
@@ -132,7 +141,8 @@ export default function EvaluationResults({ solutionId, apiConfig, solution }: E
   }
 
   // No evaluation result yet and no loading/error state
-  if (!evaluationResult && !solution) {
+  if (!evaluationResult) {
+    console.log("EvaluationResults: No result yet state, solution exists:", !!solution);
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex justify-between items-center mb-4">

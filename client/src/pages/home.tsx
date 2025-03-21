@@ -28,11 +28,19 @@ export default function Home() {
   const {
     data: selectedSolution,
     isLoading: solutionLoading,
+    error: solutionError,
   } = useQuery<Solution>({
     queryKey: ['/api/solutions', selectedSolutionId],
     enabled: !!selectedSolutionId,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: false
   });
+  
+  // Log query results
+  console.log("Selected solution ID:", selectedSolutionId);
+  console.log("Solution loading:", solutionLoading);
+  console.log("Solution error:", solutionError);
+  console.log("Selected solution data:", selectedSolution);
 
   // Handle solution selection
   const handleSolutionSelect = (solutionId: string) => {
