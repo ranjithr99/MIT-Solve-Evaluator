@@ -11,6 +11,48 @@ import { evaluateSolution } from "./gemini";
 // Configure multer for file uploads
 const upload = multer({ dest: "uploads/" });
 
+// Simple rate limiter implementation
+class RateLimiter {
+  private requestTimestamps: number[] = [];
+  private maxRequests: number;
+  private timeWindow: number; // in milliseconds
+
+  constructor(maxRequests: number, timeWindowSeconds: number) {
+    this.maxRequests = maxRequests;
+    this.timeWindow = timeWindowSeconds * 1000;
+  }
+
+  isRateLimited(): boolean {
+    const now = Date.now();
+    // Remove expired timestamps
+    this.requestTimestamps = this.requestTimestamps.filter(
+      timestamp => now - timestamp < this.timeWindow
+    );
+    
+    // Check if we've exceeded the rate limit
+    if (this.requestTimestamps.length >= this.maxRequests) {
+      return true;
+    }
+    
+    // Add current timestamp and allow the request
+    this.requestTimestamps.push(now);
+    return false;
+  }
+  
+  getTimeToWait(): number {
+    if (this.requestTimestamps.length === 0) return 0;
+    
+    const now = Date.now();
+    const oldestTimestamp = this.requestTimestamps[0];
+    const timeToWait = this.timeWindow - (now - oldestTimestamp);
+    
+    return Math.max(0, timeToWait);
+  }
+}
+
+// Create rate limiter: 5 requests per 60 seconds
+const evaluationRateLimiter = new RateLimiter(5, 60);
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes prefix
   const API_PREFIX = "/api";
@@ -98,6 +140,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Evaluate a solution using Gemini API
   app.post(`${API_PREFIX}/evaluate/:id`, async (req, res) => {
     try {
+      // Check rate limit
+      if (evaluationRateLimiter.isRateLimited()) {
+        const timeToWait = evaluationRateLimiter.getTimeToWait();
+        return res.status(429).json({ 
+          message: "Rate limit exceeded. Too many requests to the Gemini API.",
+          retryAfter: Math.ceil(timeToWait / 1000), // in seconds
+        });
+      }
+
       const { model, temperature } = req.body;
       if (!model || temperature === undefined) {
         return res.status(400).json({ message: "Model and temperature are required" });

@@ -80,10 +80,46 @@ export default function BatchEvaluation({ solutions, apiConfig }: BatchEvaluatio
         });
         
         try {
+          // Add a delay between API calls to prevent rate limiting (429 errors)
+          if (i > 0) {
+            // Wait for 2 seconds between requests to avoid rate limits
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+          
           const result = await evaluateSolution(solution.solutionId);
           results[solution.solutionId] = result;
+          
+          // If we've processed 5 items, add a longer pause to allow API quota to recover
+          if (i > 0 && i % 5 === 0) {
+            toast({
+              title: "Rate Limit Protection",
+              description: `Pausing for 5 seconds to avoid API rate limits (${i}/${solutions.length} complete)`,
+            });
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          }
         } catch (error) {
           console.error(`Error evaluating solution ${solution.solutionId}:`, error);
+          toast({
+            title: "Evaluation Error",
+            description: `Error with solution ${solution.solutionId}: ${error instanceof Error ? error.message : String(error)}`,
+            variant: "destructive",
+          });
+          
+          // If we get a rate limit error, pause for a longer time before continuing
+          if (error instanceof Error && 
+              (error.message.includes("429") || 
+               error.message.includes("rate limit") || 
+               error.message.includes("quota") || 
+               error.message.includes("Too Many Requests"))) {
+            toast({
+              title: "Rate Limit Detected",
+              description: "Pausing for 30 seconds to reset API quota before continuing",
+            });
+            await new Promise(resolve => setTimeout(resolve, 30000));
+          } else {
+            // Regular error, shorter pause
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          }
           // Continue with next solution even if one fails
         }
       }
