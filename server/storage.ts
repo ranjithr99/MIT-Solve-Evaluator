@@ -19,7 +19,7 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private solutions: Map<string, Solution>;
+  private solutions: Map<number, Solution>;
   private evaluations: Map<number, Evaluation>;
   private userId: number;
   private solutionId: number;
@@ -68,16 +68,53 @@ export class MemStorage implements IStorage {
     
     if (existingSolution) {
       // Update existing solution
+      // Ensure all optional fields are explicitly set to null if undefined
       const updatedSolution: Solution = {
         ...existingSolution,
-        ...insertSolution
+        solutionId: insertSolution.solutionId,
+        challengeName: insertSolution.challengeName ?? null,
+        summary: insertSolution.summary ?? null,
+        headquarters: insertSolution.headquarters ?? null,
+        organizationType: insertSolution.organizationType ?? null,
+        problemStatement: insertSolution.problemStatement ?? null,
+        solutionDescription: insertSolution.solutionDescription ?? null,
+        targetBeneficiaries: insertSolution.targetBeneficiaries ?? null,
+        technologiesUsed: insertSolution.technologiesUsed ?? null,
+        websiteLinks: insertSolution.websiteLinks ?? null,
+        operatingCountries: insertSolution.operatingCountries ?? null,
+        teamSize: insertSolution.teamSize ?? null,
+        duration: insertSolution.duration ?? null,
+        diversityApproaches: insertSolution.diversityApproaches ?? null,
+        businessModel: insertSolution.businessModel ?? null,
+        serviceDeliveryModel: insertSolution.serviceDeliveryModel ?? null,
+        financialSustainability: insertSolution.financialSustainability ?? null
       };
       this.solutions.set(existingSolution.id, updatedSolution);
       return updatedSolution;
     } else {
       // Create new solution
       const id = this.solutionId++;
-      const solution: Solution = { ...insertSolution, id };
+      // Ensure all optional fields are explicitly set to null if undefined
+      const solution: Solution = {
+        id,
+        solutionId: insertSolution.solutionId,
+        challengeName: insertSolution.challengeName ?? null,
+        summary: insertSolution.summary ?? null,
+        headquarters: insertSolution.headquarters ?? null,
+        organizationType: insertSolution.organizationType ?? null,
+        problemStatement: insertSolution.problemStatement ?? null,
+        solutionDescription: insertSolution.solutionDescription ?? null,
+        targetBeneficiaries: insertSolution.targetBeneficiaries ?? null,
+        technologiesUsed: insertSolution.technologiesUsed ?? null,
+        websiteLinks: insertSolution.websiteLinks ?? null,
+        operatingCountries: insertSolution.operatingCountries ?? null,
+        teamSize: insertSolution.teamSize ?? null,
+        duration: insertSolution.duration ?? null,
+        diversityApproaches: insertSolution.diversityApproaches ?? null,
+        businessModel: insertSolution.businessModel ?? null,
+        serviceDeliveryModel: insertSolution.serviceDeliveryModel ?? null,
+        financialSustainability: insertSolution.financialSustainability ?? null
+      };
       this.solutions.set(id, solution);
       return solution;
     }
