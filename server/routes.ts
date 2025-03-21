@@ -50,8 +50,8 @@ class RateLimiter {
   }
 }
 
-// Create rate limiter: 5 requests per 60 seconds
-const evaluationRateLimiter = new RateLimiter(5, 60);
+// Create rate limiter: 10 requests per 60 seconds (instead of 5)
+const evaluationRateLimiter = new RateLimiter(10, 60);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes prefix

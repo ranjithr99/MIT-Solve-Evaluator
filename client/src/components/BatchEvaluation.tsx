@@ -79,48 +79,82 @@ export default function BatchEvaluation({ solutions, apiConfig }: BatchEvaluatio
           description: `Processing ${i + 1} of ${solutions.length}: ${solution.solutionId}`,
         });
         
-        try {
-          // Add a delay between API calls to prevent rate limiting (429 errors)
-          if (i > 0) {
-            // Wait for 2 seconds between requests to avoid rate limits
-            await new Promise(resolve => setTimeout(resolve, 2000));
-          }
+        let success = false;
+        let attempts = 0;
+        const maxAttempts = 3;
+        
+        while (!success && attempts < maxAttempts) {
+          attempts++;
           
-          const result = await evaluateSolution(solution.solutionId);
-          results[solution.solutionId] = result;
-          
-          // If we've processed 5 items, add a longer pause to allow API quota to recover
-          if (i > 0 && i % 5 === 0) {
-            toast({
-              title: "Rate Limit Protection",
-              description: `Pausing for 5 seconds to avoid API rate limits (${i}/${solutions.length} complete)`,
+          try {
+            // Base delay between requests (increases with each batch)
+            const baseDelay = Math.min(2000 + (Math.floor(i / 5) * 1000), 6000);
+            
+            // Add a delay between API calls that increases with the number of requests
+            if (i > 0) {
+              await new Promise(resolve => setTimeout(resolve, baseDelay));
+            }
+            
+            const response = await fetch(`/api/evaluate/${solution.solutionId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(apiConfig),
             });
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            if (response.status === 429) {
+              // Get the server's suggestion for retry time
+              const errorData = await response.json();
+              const retryAfter = errorData.retryAfter || 60; // Default to 60 seconds if not provided
+              
+              const waitTime = retryAfter * 1000;
+              toast({
+                title: "Rate Limit Reached",
+                description: `Server is rate limited. Waiting ${retryAfter} seconds before retrying. (${i+1}/${solutions.length})`,
+              });
+              
+              // Wait for the suggested retry time plus a small random offset to prevent all clients retrying at the same moment
+              await new Promise(resolve => setTimeout(resolve, waitTime + (Math.random() * 2000)));
+              
+              // Try this solution again
+              continue;
+            }
+            
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(errorData.message || `API error: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            results[solution.solutionId] = result;
+            
+            // Invalidate evaluation cache
+            queryClient.invalidateQueries({ queryKey: ['/api/evaluations', solution.solutionId] });
+            
+            success = true;
+          } catch (error) {
+            console.error(`Error evaluating solution ${solution.solutionId}:`, error);
+            
+            if (attempts < maxAttempts) {
+              // Calculate exponential backoff time
+              const backoffTime = Math.min(30000, Math.pow(2, attempts) * 5000 + Math.random() * 3000);
+              
+              toast({
+                title: `Retry Attempt ${attempts}/${maxAttempts}`,
+                description: `Error with solution ${solution.solutionId}. Retrying in ${Math.ceil(backoffTime/1000)} seconds...`,
+                variant: "destructive",
+              });
+              
+              await new Promise(resolve => setTimeout(resolve, backoffTime));
+            } else {
+              toast({
+                title: "Evaluation Failed",
+                description: `Failed to evaluate ${solution.solutionId} after ${maxAttempts} attempts. Skipping.`,
+                variant: "destructive",
+              });
+            }
           }
-        } catch (error) {
-          console.error(`Error evaluating solution ${solution.solutionId}:`, error);
-          toast({
-            title: "Evaluation Error",
-            description: `Error with solution ${solution.solutionId}: ${error instanceof Error ? error.message : String(error)}`,
-            variant: "destructive",
-          });
-          
-          // If we get a rate limit error, pause for a longer time before continuing
-          if (error instanceof Error && 
-              (error.message.includes("429") || 
-               error.message.includes("rate limit") || 
-               error.message.includes("quota") || 
-               error.message.includes("Too Many Requests"))) {
-            toast({
-              title: "Rate Limit Detected",
-              description: "Pausing for 30 seconds to reset API quota before continuing",
-            });
-            await new Promise(resolve => setTimeout(resolve, 30000));
-          } else {
-            // Regular error, shorter pause
-            await new Promise(resolve => setTimeout(resolve, 3000));
-          }
-          // Continue with next solution even if one fails
         }
       }
       
