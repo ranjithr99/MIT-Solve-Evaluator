@@ -11,6 +11,7 @@ export interface IStorage {
   getAllSolutions(): Promise<Solution[]>;
   getSolutionById(solutionId: string): Promise<Solution | undefined>;
   createOrUpdateSolution(solution: InsertSolution): Promise<Solution>;
+  clearAllSolutions(): Promise<void>;
   
   // Evaluation operations
   storeEvaluation(evaluation: InsertEvaluation): Promise<Evaluation>;
@@ -55,6 +56,12 @@ export class MemStorage implements IStorage {
   // Solution operations
   async getAllSolutions(): Promise<Solution[]> {
     return Array.from(this.solutions.values());
+  }
+  
+  async clearAllSolutions(): Promise<void> {
+    // Clear solutions map and reset the ID counter
+    this.solutions.clear();
+    this.solutionId = 1;
   }
 
   async getSolutionById(solutionId: string): Promise<Solution | undefined> {

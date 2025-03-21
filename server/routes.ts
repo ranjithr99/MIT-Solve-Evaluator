@@ -120,7 +120,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Clean up the temp file
           fs.unlinkSync(filePath);
           
-          // Save solutions to storage
+          // First, clear all existing solutions
+          await storage.clearAllSolutions();
+          
+          // Then save new solutions to storage
           for (const solution of solutions) {
             await storage.createOrUpdateSolution(solution);
           }
